@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="edu.mit.c301.dao.ProductDAO">
+	<insert id="registProduct">
+		insert into product(product_code,product_name,manufacturing_cost,goal_quantity,stock,selling_cost,group_code)
+		values(#{product_code},#{product_name},#{manufacturing_cost},#{goal_quantity},#{stock},#{selling_cost},#{group_code})
+	</insert>
+	
+	<select id="inquiryProduct" resultType="edu.mit.c301.vo.ProductVO">
+		select product_code, product_name, manufacturing_cost, goal_quantity, stock, selling_cost, group_name 
+		from product natural join group_info
+		where product_code=#{product_code}
+	</select>
+	
+	<update id="modifyProduct">
+		update product 
+		set product_code=#{ProductVO.product_code}, product_name=#{ProductVO.product_name}, manufacturing_cost=#{ProductVO.manufacturing_cost},
+			goal_quantity=#{ProductVO.goal_quantity}, stock=#{ProductVO.stock}, selling_cost=#{ProductVO.selling_cost}, group_code=#{ProductVO.group_code}
+		where product_code=#{productCode}
+	</update>
+	
+	<delete id="deleteProduct">
+		delete from product 
+		where product_code=#{product_code};
+	</delete>
+	
+	<select id="priorityList" resultType="edu.mit.c301.vo.PriorityVO">
+		select product_name, round(((goal_quantity*0.2)-stock)) as "amount_to_add"
+		from product 
+		<![CDATA[where stock<(goal_quantity*0.2)]]>
+	</select>
+	
+	<select id="rankOfProfit" resultType="edu.mit.c301.vo.RankVO">
+		select product_name, (stock*selling_cost) as "total_profit" 
+		from product 
+		order by (stock*selling_cost) desc;
+	</select>
+	
+	<select id="stockOfGroup" resultType="edu.mit.c301.vo.StockVO">
+		select group_name, count(*) as count
+		from group_info natural join product 
+		group by group_code
+	</select>
+</mapper>
